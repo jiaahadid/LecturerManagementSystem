@@ -1,66 +1,104 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Lecturer Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A web application for managing lecturer records in an academic setting. Staff can register an account, log in, and view the lecturer list. Administrators can add, edit, and delete lecturers.
 
-## About Laravel
+The project is built with **Laravel 10**, **MySQL/MariaDB**, and Blade views.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## What the system does
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+The system keeps a central list of lecturers (name, email, and department) and controls who can change that list.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. A visitor opens the site and is sent to **Login**.
+2. New staff **Register** with a name, email, password, and role (`user` or `admin`).
+3. After registration, that person’s name and email are also added to the **lecturer list** (department starts as `Unassigned`).
+4. After login, the home page shows the signed-in name and role.
+5. **Lecturers** shows every lecturer currently stored in the database.
+6. Only an **admin** can add a lecturer, edit details, or delete a record.
+7. **Logout** ends the session and returns to the login page.
 
-## Learning Laravel
+Authentication uses a session (`user` and `user_id`), not Laravel’s default `Auth` guard.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Roles
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+| Role | Access |
+| --- | --- |
+| **User** | Home, lecturer list (view only), logout |
+| **Admin** | Everything a user can do, plus Add / Edit / Delete lecturers |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+If a non-admin tries to open an admin page, they are redirected back to the lecturer list.
 
-## Laravel Sponsors
+## Main pages
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+| Page | Route | Description |
+| --- | --- | --- |
+| Login | `/login` | Sign in with email and password |
+| Register | `/register` | Create an account and add the person to the lecturer list |
+| Home | `/home` | Welcome screen after login |
+| Lecturers | `/lecturers` | Full lecturer list |
+| Add lecturer | `/lecturer/add` | Admin form to create a lecturer |
+| Edit lecturer | `/lecturer/edit/{id}` | Admin form to update a lecturer |
+| Documentation | `/docs` | Generated class documentation (optional) |
 
-### Premium Partners
+`/` redirects to Home if already logged in, otherwise to Login.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Data stored
 
-## Contributing
+- **users** — login accounts: name, email, hashed password, role
+- **lecturers** — lecturer records: name, email, department
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+These are separate tables. Registering creates a user and, if that email is not already a lecturer, a matching lecturer row.
 
-## Code of Conduct
+## Optional documentation
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+`/docs` shows technical notes generated from controllers. To regenerate them (needs an OpenAI API key in `.env`):
 
-## Security Vulnerabilities
+```bash
+php artisan generate:docs
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Requirements
 
-## License
+- PHP 8.1+
+- Composer
+- MySQL or MariaDB (XAMPP is fine)
+
+## Setup
+
+```bash
+composer install
+copy .env.example .env
+php artisan key:generate
+```
+
+In `.env`, set the database to match your MySQL/XAMPP setup:
+
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=lectsystem
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+If XAMPP MySQL is on another port (for example `3307` because another MySQL is using `3306`), change `DB_PORT` to that port.
+
+Create the database, then either import `lectsystem.sql` or run:
+
+```bash
+php artisan migrate
+```
+
+Start the app:
+
+```bash
+php artisan serve
+```
+
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000).
+
+## Built with Laravel
+
+This application is based on the [Laravel](https://laravel.com) framework. Laravel documentation is available at [https://laravel.com/docs](https://laravel.com/docs).
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
